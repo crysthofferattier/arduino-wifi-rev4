@@ -6,20 +6,20 @@ DebugManager debugManager;
 
 ClientManager::ClientManager()
 {
-    _client = WiFiClient();
+    _client = WiFiSSLClient();
 };
 
 String ClientManager::get(String endpoint, const char *host, int port)
 {
-    Serial.println(host);
-    Serial.println(endpoint);
-    Serial.println(port);
-    
     if (_client.connect(host, port))
     {
-        _client.println("GET /" + endpoint + " HTTP/1.1");
-        _client.println("Host: arduinowifimarco.ie");
+        Serial.println("Connected to server.");
+
+        _client.println("GET " + endpoint + " HTTP/1.1");
+        _client.print("Host: ");
+        _client.println(host);
         _client.println("Connection: close");
+        _client.println("Accept: application/json\r\n\r\n");
         _client.println();
 
         return readResponse();
@@ -33,19 +33,22 @@ String ClientManager::readResponse()
     String response = "";
     bool isBody = false;
 
-    while (_client.connected())
+    unsigned long timeout = millis(); // prevent getting stuck
+    while (_client.connected() && millis() - timeout < 5000)
     {
         while (_client.available())
         {
             String line = _client.readStringUntil('\n');
+            line.trim(); // remove \r or extra whitespace
 
-            if (line == "\r")
+            if (!isBody)
             {
-                isBody = true;
-                continue;
+                if (line.length() == 0)
+                {
+                    isBody = true; // blank line = end of headers
+                }
             }
-
-            if (isBody)
+            else
             {
                 response += line;
             }
@@ -53,7 +56,8 @@ String ClientManager::readResponse()
     }
 
     _client.stop();
-    Serial.println("Print response!");
+    Serial.println("Response body:");
+    //response.trim();
     Serial.println(response);
 
     return response;

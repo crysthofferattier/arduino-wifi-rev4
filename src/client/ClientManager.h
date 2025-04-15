@@ -15,7 +15,7 @@ public:
     String readResponse();
 
 private:
-    WiFiClient _client;
+    WiFiSSLClient _client;
     String _host;
     int _port;
 };

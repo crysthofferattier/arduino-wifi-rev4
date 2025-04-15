@@ -10,29 +10,54 @@ void UtilsManager::setupRTCModule()
 {
     RTC.begin();
 
-    DynamicJsonDocument jsonObj = parseJson(clientManager.get("api/time/current/zone?timeZone=Europe%2FDublin", "https://timeapi.io", 443));
+    // Get the raw JSON response as a string
+    String jsonResponse = clientManager.get("/api/time/current/zone?timeZone=Europe%2FDublin", "timeapi.io", 443);
 
-    long timestamp = jsonObj["timestamp"];
+    // Parse the JSON response into a DynamicJsonDocument
+    DynamicJsonDocument jsonObj = parseJson(jsonResponse);
+
+    long timestamp = jsonObj["dateTime"];
+
+    Serial.println("timestamp");
+    Serial.println(timestamp);
 
     RTCTime timeToSet = timestamp;
     RTC.setTime(timeToSet);
-
-    Serial.println(timestamp);
 }
 
-DynamicJsonDocument UtilsManager::parseJson(String json){
+DynamicJsonDocument UtilsManager::parseJson(const String& json) {
     DynamicJsonDocument doc(1024); // 1 KB buffer
 
-    // Parse the JSON response
-    DeserializationError error = deserializeJson(doc, json);
+// Make a copy of the input json to avoid modifying the original constant reference
+    String jsonCopy = json;
+    jsonCopy = cleanJsonResponse(jsonCopy);
 
-    if (error)
-    {
+    DeserializationError error = deserializeJson(doc, jsonCopy);
+
+    if (error) {
         Serial.print("Failed to parse JSON: ");
         Serial.println(error.f_str());
+
+        setupRTCModule();
+    } else {
+        Serial.println("JSON parsed successfully!");
     }
 
     return doc;
+}
+
+String UtilsManager::cleanJsonResponse(String& response) {
+    // Remove random characters at the beginning
+    while (response.length() > 0 && response[0] != '{') {
+        response.remove(0, 1);  // Remove first character until '{'
+    }
+
+    // Remove random characters at the end
+    while (response.length() > 0 && response[response.length() - 1] != '}') {
+        response.remove(response.length() - 1, 1);  // Remove last character until '}'
+    }
+
+    return response;
 }
 
 void UtilsManager::getCurrentTime()

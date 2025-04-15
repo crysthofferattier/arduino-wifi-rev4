@@ -12,7 +12,8 @@ public:
 
     void setupRTCModule();
     void getCurrentTime();
-    DynamicJsonDocument parseJson(String json);
+    DynamicJsonDocument parseJson(const String& json);
+    String cleanJsonResponse(String& json);
 
 private:
 };

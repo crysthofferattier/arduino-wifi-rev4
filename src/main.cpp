@@ -9,7 +9,6 @@
 
 NetworkManager networkManager(SECRET_SSID, SECRET_PASS);
 
-WiFiClient client;
 ClientManager clientManager;
 UtilsManager utilsManager;
 
@@ -37,8 +36,6 @@ void loop()
   delay(1000);
   digitalWrite(LED_BUILTIN, LOW);
   delay(1000);
-  // sendDataToServer();
 
-  // clientManager.get("timestamp");
   utilsManager.getCurrentTime();
 }
