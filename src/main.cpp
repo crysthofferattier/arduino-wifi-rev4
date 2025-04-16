@@ -2,23 +2,21 @@
 #include <network/NetworkManager.h>
 #include <client/ClientManager.h>
 #include <utils/UtilsManager.h>
+#include <debug/DebugManager.h>
 #include <secrets.h>
 #include <constants.h>
 
 #include "RTC.h"
 
-NetworkManager networkManager(SECRET_SSID, SECRET_PASS);
-
-ClientManager clientManager;
-UtilsManager utilsManager;
-
-void sendDataToServer();
-
-void setUpRTCModule();
-
 void setup()
 {
   Serial.begin(9600);
+  while (!Serial)
+  {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
+
+  debugManager.debugMessage(debugManager.LOG_INFO, "Setting Up.");
   pinMode(LED_BUILTIN, OUTPUT);
 
   networkManager.connect();
@@ -36,6 +34,7 @@ void loop()
   delay(1000);
   digitalWrite(LED_BUILTIN, LOW);
   delay(1000);
+  debugManager.debugMessage(debugManager.LOG_INFO, "LED...");
 
-  // utilsManager.getCurrentTime();
+  utilsManager.getCurrentTime();
 }

@@ -14,4 +14,6 @@ public:
 
     void debugMessage(String lvl, String msg);
 };
+
+extern DebugManager debugManager;
 #endif

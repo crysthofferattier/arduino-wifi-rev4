@@ -1,19 +1,20 @@
 #include <utils/UtilsManager.h>
 #include <client/ClientManager.h>
+#include <debug/DebugManager.h>
 #include <ArduinoJson.h>
 
 #include <RTC.h>
 
 UtilsManager::UtilsManager() {};
 
+UtilsManager utilsManager;
+
 void UtilsManager::setupRTCModule()
 {
-    // String jsonResponse = clientManager.get("/api/time/current/zone?timeZone=Europe%2FDublin", "timeapi.io", 443);
-    String jsonResponse = clientManager.get("/posts/1", "jsonplaceholder.typicode.com", 443);
-    // String jsonResponse = clientManager.get("/objects?id=3&id=5&id=10", "api.restful-api.dev", 443);
+    String jsonResponse = clientManager.get("/api/time/current/zone?timeZone=Europe%2FDublin", "timeapi.io", 443);
 
-    Serial.println("jsonResponse");
-    Serial.println(jsonResponse);
+    debugManager.debugMessage(debugManager.LOG_DEBUG, jsonResponse);
+
     DynamicJsonDocument jsonObj = parseJson(jsonResponse);
 
     int year = jsonObj["year"];
@@ -28,6 +29,8 @@ void UtilsManager::setupRTCModule()
 
     RTCTime startTime(day, static_cast<Month>(month - 1), year, hour, minute, second, DayOfWeek::WEDNESDAY, SaveLight::SAVING_TIME_ACTIVE);
     RTC.setTime(startTime);
+
+    getCurrentTime();
 }
 
 String UtilsManager::extractJsonFromChunkedResponse(const String &rawResponse)
@@ -35,7 +38,6 @@ String UtilsManager::extractJsonFromChunkedResponse(const String &rawResponse)
     int bodyStart = rawResponse.indexOf("\r\n\r\n");
     if (bodyStart == -1)
     {
-        Serial.println("No header-body separator found!");
         return "";
     }
 
@@ -70,7 +72,6 @@ String UtilsManager::extractJsonBody(const String &rawResponse)
 
     if (bodyIndex == -1)
     {
-        Serial.println("No header-body separator found!");
         return "";
     }
 
@@ -92,14 +93,7 @@ DynamicJsonDocument UtilsManager::parseJson(const String &json)
 
     if (error)
     {
-        Serial.print("Failed to parse JSON: ");
-        Serial.println(error.f_str());
-
         setupRTCModule();
-    }
-    else
-    {
-        Serial.println("JSON parsed successfully!");
     }
 
     return doc;
@@ -126,15 +120,9 @@ void UtilsManager::getCurrentTime()
 {
     RTCTime currentTime;
     RTC.getTime(currentTime);
-    Serial.print(currentTime.getYear());
-    Serial.print("-");
-    Serial.print(Month2int(currentTime.getMonth()));
-    Serial.print("-");
-    Serial.print(currentTime.getDayOfMonth());
-    Serial.print(" ");
-    Serial.print(currentTime.getHour());
-    Serial.print(":");
-    Serial.print(currentTime.getMinutes());
-    Serial.print(":");
-    Serial.println(currentTime.getSeconds());
+
+    String date = String(currentTime.getYear()) + "-" + String(Month2int(currentTime.getMonth())) + "-" + String(currentTime.getDayOfMonth());
+    String time = String(currentTime.getHour()) + ":" + String(currentTime.getMinutes()) + ":" + String(currentTime.getSeconds());
+
+    debugManager.debugMessage(debugManager.LOG_INFO, date + " " + time);
 }

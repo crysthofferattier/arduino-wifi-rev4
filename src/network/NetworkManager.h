@@ -18,4 +18,6 @@ private:
     const char *_password;
 };
 
+extern NetworkManager networkManager;
+
 #endif

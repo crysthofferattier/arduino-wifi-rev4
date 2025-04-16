@@ -5,8 +5,6 @@
 #include <WiFiS3.h>
 #include "RTC.h"
 
-bool DEBUG = true;
-
 WiFiClient client;
 
 int status = WL_IDLE_STATUS;
@@ -106,7 +104,7 @@ void getServerTimeStamp()
 {
   if (client.connect(SERVER_ADDR, SERVER_PORT))
   {
-    debugMessage(LOG_DEBUG, F("connected to server"));
+    debugMessage("LOG_DEBUG", "connected to server");
     // Make a HTTP request:
     client.println("GET /timestamp HTTP/1.1");
     client.println("Host: arduinorev4wifi.com");
