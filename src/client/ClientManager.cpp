@@ -20,9 +20,15 @@ String ClientManager::get(String endpoint, const char *host, int port)
         _client.println(host);
         _client.println("Connection: close");
         _client.println("Accept: application/json\r\n\r\n");
-        _client.println();
+        _client.println();    
 
         return readResponse();
+    }
+    else
+    {
+        Serial.print("Connection to: ");
+        Serial.print(host);
+        Serial.println(" Failed!");
     }
 
     return "";
@@ -31,34 +37,20 @@ String ClientManager::get(String endpoint, const char *host, int port)
 String ClientManager::readResponse()
 {
     String response = "";
-    bool isBody = false;
 
-    unsigned long timeout = millis(); // prevent getting stuck
-    while (_client.connected() && millis() - timeout < 5000)
+    // Wait for the response
+    while (!_client.available())
     {
-        while (_client.available())
-        {
-            String line = _client.readStringUntil('\n');
-            line.trim(); // remove \r or extra whitespace
+        Serial.println("Waiting for client");
+        delay(100);
+    }
 
-            if (!isBody)
-            {
-                if (line.length() == 0)
-                {
-                    isBody = true; // blank line = end of headers
-                }
-            }
-            else
-            {
-                response += line;
-            }
-        }
+    while (_client.available())
+    {
+        response += char(_client.read());
     }
 
     _client.stop();
-    Serial.println("Response body:");
-    //response.trim();
-    Serial.println(response);
 
     return response;
 }

@@ -14,6 +14,9 @@ public:
     void getCurrentTime();
     DynamicJsonDocument parseJson(const String& json);
     String cleanJsonResponse(String& json);
+    String extractJsonFromChunkedResponse(const String &rawResponse);
+    String extractJsonBody(const String &rawResponse);
+
 
 private:
 };

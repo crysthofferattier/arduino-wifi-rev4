@@ -13,7 +13,7 @@ public:
     String get(String endpoint, const char *host = SERVER_ADDR, int port = SERVER_PORT);
     String post(String URL, String endpoint);
     String readResponse();
-
+    
 private:
     WiFiSSLClient _client;
     String _host;
